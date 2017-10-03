@@ -19,7 +19,7 @@ else
   s['user'] ||= ENV['SYNCC_USER'] || ENV['USER']
 
   sync_path = "#{s['user']}@#{s['host']}:#{s['path']}"
-  excludes = (s['exclude'].to_a + ['.syncc', '.git']).
+  excludes = (s['exclude'].to_a + ['.syncc', '.git', '.*.swp']).
     map { |x| "--exclude=#{x}" }.join(" ")
   port = s['port'] ? "-p #{s['port']}" : ""
   exec "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
