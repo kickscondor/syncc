@@ -22,5 +22,5 @@ else
   excludes = (s['exclude'].to_a + ['.syncc', '.git']).
     map { |x| "--exclude=#{x}" }.join(" ")
   port = s['port'] ? "-p #{s['port']}" : ""
-  puts "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
+  exec "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
 end
