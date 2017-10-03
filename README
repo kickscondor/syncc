@@ -1,0 +1,46 @@
+Syncc
+
+A simple wrapper for rsync that allows deployment settings to be kept in
+source control. Deployment is done via ssh and the script itself is written
+in Ruby.
+
+Simply put a `.syncc` file in your project:
+
+  host: remote-server.com
+  port: 2222
+  remotes:
+    live:
+      path: /var/www/production
+    dev:
+      path: /var/www/development
+
+Then, to deploy the current directory's content (no Git integration is provided,)
+run:
+
+  syncc dev
+
+To deploy to your development directory on remote-server.com.
+
+Settings placed at the top level are used with each remote destination. So, if
+your remotes are on different servers, simply move the 'host' down into the
+remotes individual setting for that alias:
+
+  port: 2222
+  remotes:
+    live:
+      host: remote-server.com
+      path: /var/www/production
+    dev:
+      host: test.remote-server.com
+      path: /var/www/development
+    beta:
+      host: beta.remote-server.com
+      path: /var/www/beta
+      port: 22
+
+You can also exclude files by providing a list:
+
+  exclude: [.DS_Store]
+
+Some files (such as .git, .syncc and .*.swp files) are automatically excluded
+from the sync.
