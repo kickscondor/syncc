@@ -1,0 +1,26 @@
+#!/usr/bin/ruby
+require 'yaml'
+
+begin
+  conf = YAML.load_file('.syncc')
+rescue Errno::ENOENT
+  abort "** No .syncc file found in the current directory."
+end
+
+abort "** No 'remotes' found in your .syncc file." unless
+  conf['remotes'].to_a.length > 0
+
+if ARGV.length != 1
+  puts "Usage: syncc <alias>"
+  puts "-- Your aliases: #{conf['remotes'].keys.join(', ')}"
+else
+  s = conf.merge(conf['remotes'][ARGV[0]])
+  abort "** No remote named '#{ARGV[0]}' in your .syncc file" unless s
+  s['user'] ||= ENV['SYNCC_USER'] || ENV['USER']
+
+  sync_path = "#{s['user']}@#{s['host']}:#{s['path']}"
+  excludes = (s['exclude'].to_a + ['.syncc', '.git']).
+    map { |x| "--exclude=#{x}" }.join(" ")
+  port = s['port'] ? "-p #{s['port']}" : ""
+  puts "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
+end
