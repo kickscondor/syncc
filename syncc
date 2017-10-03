@@ -18,9 +18,14 @@ if ARGV.length != 1
 else
   s = conf.merge(conf['remotes'][ARGV[0]])
   abort "** No remote named '#{ARGV[0]}' in your .syncc file" unless s
-  s['user'] ||= ENV['SYNCC_USER'] || ENV['USER']
+  s['user'] ||= ENV['SYNCC_USER']
 
-  sync_path = "#{s['user']}@#{s['host']}:#{s['path']}"
+  sync_path = s['path']
+  if s['host']
+    sync_path = "#{s['host']}:#{s['path']}"
+    sync_path = "#{s['user']}@#{sync_path}"
+  end
+
   excludes = (s['exclude'].to_a + DEFAULT_EXCLUDE).
     map { |x| "--exclude=#{x}" }.join(" ")
   port = s['port'] ? "-p #{s['port']}" : ""
