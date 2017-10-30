@@ -3,10 +3,19 @@ require 'yaml'
 
 DEFAULT_EXCLUDE = ['.syncc', '.git', '.*.swp']
 
+parts = Dir.pwd.split('/')
+subs = []
+while not parts.empty?
+  break if File.exists? File.join(*parts, '.syncc')
+  subs.unshift parts.pop
+end
+path = '/' + parts.join('/')
+subdir = subs.join
+
 begin
-  conf = YAML.load_file('.syncc')
+  conf = YAML.load_file(File.join(path, '.syncc'))
 rescue Errno::ENOENT
-  abort "** No .syncc file found in the current directory."
+  abort "** No .syncc file found in the directory tree."
 end
 
 abort "** No 'remotes' found in your .syncc file." unless
@@ -20,10 +29,12 @@ else
   abort "** No remote named '#{ARGV[0]}' in your .syncc file" unless s
   s['user'] ||= ENV['SYNCC_USER']
 
-  sync_path = s['path']
+  sync_path = File.join(s['path'], subdir)
   if s['host']
-    sync_path = "#{s['host']}:#{s['path']}"
-    sync_path = "#{s['user']}@#{sync_path}"
+    sync_path = "#{s['host']}:#{sync_path}"
+    if s['user']
+      sync_path = "#{s['user']}@#{sync_path}"
+    end
   end
 
   excludes = (s['exclude'].to_a + DEFAULT_EXCLUDE).
