@@ -47,5 +47,8 @@ else
   excludes = (s['exclude'].to_a + DEFAULT_EXCLUDE).
     map { |x| "--exclude=#{x}" }.join(" ")
   port = s['port'] ? "-p #{s['port']}" : ""
-  exec "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
+
+  cmd = "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
+  puts cmd
+  exec cmd
 end
