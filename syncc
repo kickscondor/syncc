@@ -17,7 +17,6 @@ while not parts.empty?
   subs.unshift parts.pop
 end
 path = '/' + parts.join('/')
-subdir = subs.join
 
 begin
   conf = YAML.load_file(File.join(path, '.syncc'))
@@ -36,6 +35,19 @@ else
   abort "** No remote named '#{ARGV[0]}' in your .syncc file" unless s
   s['user'] ||= ENV['SYNCC_USER']
 
+  locals = (s['folder'] || "").split('/')
+  while locals.length > 0 and subs.length > 0
+    if locals.first == subs.first
+      locals.shift
+      subs.shift
+    else
+      abort "** The '#{s['folder']}' folder is not in the current directory tree."
+    end
+  end
+  locals << "*"
+  local= locals.join('/')
+  subdir = subs.join('/')
+
   sync_path = File.join(s['path'], subdir)
   if s['host']
     sync_path = "#{s['host']}:#{sync_path}"
@@ -47,8 +59,9 @@ else
   excludes = (s['exclude'].to_a + DEFAULT_EXCLUDE).
     map { |x| "--exclude=#{x}" }.join(" ")
   port = s['port'] ? "-p #{s['port']}" : ""
+  local = s['folder'] ? "#{s['folder']}/*" : "*"
 
-  cmd = "rsync -PSauve 'ssh #{port}' #{excludes} * #{sync_path}"
+  cmd = "rsync -PSauve 'ssh #{port}' #{excludes} #{local} #{sync_path}"
   puts cmd
   exec cmd
 end
