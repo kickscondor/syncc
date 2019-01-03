@@ -61,6 +61,12 @@ else
   port = s['port'] ? "-p #{s['port']}" : ""
   local = s['folder'] ? "#{s['folder']}/*" : "*"
 
+  if s['confirm']
+    print "-- Type 'yes' to confirm syncc to '#{ARGV[0]}': "
+    input = $stdin.gets.strip.downcase
+    exit if input != 'yes'
+  end
+
   cmd = "rsync -PSauve 'ssh #{port}' #{excludes} #{local} #{sync_path}"
   puts cmd
   exec cmd
